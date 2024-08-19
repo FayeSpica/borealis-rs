@@ -118,4 +118,8 @@ impl crate::lib::core::video::VideoContext for GLFWVideoContext {
         }
         !window.should_close()
     }
+
+    fn get_nvg_context(&self) -> &nanovg::Context {
+        &self.nvg_context
+    }
 }

@@ -26,3 +26,13 @@ pacman -S mingw-w64-clang-x86_64-rust
 export CC=clang  
 export CXX=clang++
 ```
+
+## android
+```shell
+cargo install cargo-apk
+rustup target add aarch64-linux-android
+
+export ANDROID_HOME=
+export ANDROID_NDK_ROOT=
+export PATH=JAVA_HOME/bin
+```
