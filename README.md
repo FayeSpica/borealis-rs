@@ -35,4 +35,6 @@ rustup target add aarch64-linux-android
 export ANDROID_HOME=
 export ANDROID_NDK_ROOT=
 export PATH=JAVA_HOME/bin
+
+cargo apk r -p borealis-rs --example android
 ```
