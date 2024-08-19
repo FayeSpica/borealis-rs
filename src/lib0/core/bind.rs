@@ -41,22 +41,22 @@ impl BoundView {
         }
 
         // Resolve by owner view first
-        if let Some(owner_view) = &self.owner_view.get_mut() {
-            self.view = owner_view.get_view(&self.id);
-
-            if self.view.borrow().is_none() {
-                error!("Cannot find view with ID")
-            }
-        }
-        // Then resolve by owner activity
-        else if let Some(owner_activity) = &self.owner_activity.get_mut() {
-            self.view = owner_activity.get_view(&self.id);
-
-            if self.view.borrow().is_none() {
-                error!("Cannot find view with ID")
-            }
-        } else {
-            error!("Cannot find view with ID")
-        }
+        // if let Some(owner_view) = &self.owner_view.get_mut() {
+        //     self.view = owner_view.get_view(&self.id);
+        //
+        //     if self.view.borrow().is_none() {
+        //         error!("Cannot find view with ID")
+        //     }
+        // }
+        // // Then resolve by owner activity
+        // else if let Some(owner_activity) = &self.owner_activity.get_mut() {
+        //     self.view = owner_activity.get_view(&self.id);
+        //
+        //     if self.view.borrow().is_none() {
+        //         error!("Cannot find view with ID")
+        //     }
+        // } else {
+        //     error!("Cannot find view with ID")
+        // }
     }
 }

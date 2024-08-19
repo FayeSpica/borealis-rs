@@ -6,7 +6,9 @@ use once_cell::sync::Lazy;
 use crate::lib::core::input::{ControllerState, InputManager};
 
 // Input manager for GLFW gamepad and keyboard
-pub struct GLFWInputManager {}
+pub struct GLFWInputManager {
+    g: Rc<RefCell<Glfw>>,
+}
 
 fn glfw_joystick_call_back(id: glfw::JoystickId, event: glfw::JoystickEvent) {
     match event {
@@ -20,11 +22,13 @@ fn glfw_joystick_call_back(id: glfw::JoystickId, event: glfw::JoystickEvent) {
 }
 
 impl GLFWInputManager {
-    pub fn new(g: &mut Glfw) -> Self {
+    pub fn new(g: Rc<RefCell<Glfw>>) -> Self {
 
-        g.set_joystick_callback(glfw_joystick_call_back);
+        g.borrow_mut().set_joystick_callback(glfw_joystick_call_back);
 
-        GLFWInputManager {}
+        GLFWInputManager {
+            g,
+        }
     }
 }
 
@@ -71,9 +75,9 @@ pub static GLFW_GAMEPAD_TO_KEYBOARD: Lazy<Vec<glfw::Key>> = Lazy::new(||{
 });
 
 impl InputManager for GLFWInputManager {
-    fn get_controller_state(&self, g: &Glfw) -> ControllerState {
+    fn get_controller_state(&self) -> ControllerState {
         let mut state = ControllerState::new();
-        let joystick = g.get_joystick(glfw::JoystickId::Joystick1);
+        let joystick = self.g.borrow_mut().get_joystick(glfw::JoystickId::Joystick1);
         if joystick.is_present() {
             match joystick.get_gamepad_state() {
                 None => {}

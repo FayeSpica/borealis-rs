@@ -49,49 +49,25 @@ pub trait Platform {
      * Returns the AudioPlayer for the platform.
      * Cannot return nullptr.
      */
-    fn get_audio_player(&self) -> & Box<dyn AudioPlayer>;
+    fn get_audio_player(&mut self) -> Rc<RefCell<Box<dyn AudioPlayer>>>;
 
     /**
      * Returns the VideoContext for the platform.
      * Cannot return nullptr.
      */
-    fn get_video_context(&self) -> & Box<dyn VideoContext>;
+    fn get_video_context(&mut self) -> Rc<RefCell<Box<dyn VideoContext>>>;
 
     /**
      * Returns the InputManager for the platform.
      * Cannot return nullptr.
      */
-    fn get_input_manager(&self) -> & Box<dyn InputManager>;
+    fn get_input_manager(&mut self) -> Rc<RefCell<Box<dyn InputManager>>>;
 
     /**
      * Returns the FontLoader for the platform.
      * Cannot return nullptr.
      */
-    fn get_font_loader(&self) -> & Box<dyn FontLoader>;
-
-    /**
-     * Returns the AudioPlayer for the platform.
-     * Cannot return nullptr.
-     */
-    fn get_audio_player_mut(&mut self) -> &mut Box<dyn AudioPlayer>;
-
-    /**
-     * Returns the VideoContext for the platform.
-     * Cannot return nullptr.
-     */
-    fn get_video_context_mut(&mut self) -> &mut Box<dyn VideoContext>;
-
-    /**
-     * Returns the InputManager for the platform.
-     * Cannot return nullptr.
-     */
-    fn get_input_manager_mut(&mut self) -> &mut Box<dyn InputManager>;
-
-    /**
-     * Returns the FontLoader for the platform.
-     * Cannot return nullptr.
-     */
-    fn get_font_loader_mut(&mut self) -> &mut Box<dyn FontLoader>;
+    fn get_font_loader(&mut self) -> Rc<RefCell<Box<dyn FontLoader>>>;
 }
 
 /**

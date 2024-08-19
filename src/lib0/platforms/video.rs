@@ -9,9 +9,9 @@ use nanovg::{Color};
 
 // GLFW Video Context
 pub struct GLFWVideoContext {
-    pub g: Glfw,
-    pub window: glfw::PWindow,
-    pub nvg_context: nanovg::Context,
+    g: Rc<RefCell<Glfw>>,
+    window: Rc<RefCell<glfw::PWindow>>,
+    nvg_context: Rc<RefCell<nanovg::Context>>,
 }
 
 extern "C" fn glfw_window_framebuffer_size_callback(window: *mut GLFWwindow, width: c_int, height: c_int) {
@@ -57,7 +57,7 @@ impl GLFWVideoContext {
         }
 
         // Initialize nanovg
-        let mut nvg_context = nanovg::ContextBuilder::new()
+        let mut context = nanovg::ContextBuilder::new()
             .stencil_strokes()
             .antialias()
             .build()
@@ -67,10 +67,18 @@ impl GLFWVideoContext {
         glfw_window_framebuffer_size_callback(window.window_ptr(), window_width as c_int, window_height as c_int);
 
         GLFWVideoContext{
-            g,
-            window,
-            nvg_context,
+            g: Rc::new(RefCell::new(g)),
+            window: Rc::new(RefCell::new(window)),
+            nvg_context: Rc::new(RefCell::new(context)),
         }
+    }
+
+    pub fn get_glfw(&mut self) -> Rc<RefCell<Glfw>> {
+        Rc::clone(&self.g)
+    }
+
+    pub fn get_glfw_window(&mut self) -> Rc<RefCell<PWindow>> {
+        Rc::clone(&self.window)
     }
 }
 
@@ -88,7 +96,7 @@ impl crate::lib::core::video::VideoContext for GLFWVideoContext {
 
     fn end_frame(&self) {
         unsafe {
-            glfwSwapBuffers(self.window.window_ptr());
+            glfwSwapBuffers(self.window.borrow_mut().window_ptr());
         }
     }
 
@@ -102,20 +110,7 @@ impl crate::lib::core::video::VideoContext for GLFWVideoContext {
         }
     }
 
-    fn main_loop_iteration(&mut self) -> bool {
-        let mut is_active = false;
-        let window = &mut self.window;
-        let mut g = &mut self.g;
-        while !is_active {
-
-            is_active = unsafe { glfw::ffi::glfwGetWindowAttrib(window.window_ptr(), glfw::ffi::ICONIFIED) != 0 };
-
-            if is_active {
-                g.poll_events();
-            } else {
-                g.wait_events();
-            }
-        }
-        !window.should_close()
+    fn get_nvg_context(&mut self) -> Rc<RefCell<nanovg::Context>> {
+        Rc::clone(&self.nvg_context)
     }
 }

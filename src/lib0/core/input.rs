@@ -1,5 +1,4 @@
 use std::convert::Into;
-use glfw::Glfw;
 use strum::{EnumCount, IntoEnumIterator};
 use strum_macros::{EnumCount as EnumCountMacro, EnumIter};
 
@@ -71,6 +70,6 @@ pub trait InputManager {
     /**
      * Called once every frame to fill the given ControllerState struct with the controller state.
      */
-    fn get_controller_state(&self, g: &Glfw) -> ControllerState;
+    fn get_controller_state(&self) -> ControllerState;
 }
 

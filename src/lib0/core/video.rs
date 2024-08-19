@@ -29,5 +29,5 @@ pub trait VideoContext {
      */
     fn reset_state(&self);
 
-    fn main_loop_iteration(&mut self) -> bool;
+    fn get_nvg_context(&mut self) -> Rc<RefCell<nanovg::Context>>;
 }
