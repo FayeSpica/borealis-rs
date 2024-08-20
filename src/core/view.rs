@@ -1,40 +1,27 @@
-use crate::gl;
-use femtovg::renderer::OpenGl;
-use femtovg::{Canvas, Color};
-use glutin::context::PossiblyCurrentContext;
-use glutin::surface::{Surface, WindowSurface};
-use winit::window::Window;
+use nanovg::Context;
+use nanovg_sys::{nvgBeginFrame, nvgBeginPath, NVGcolor, nvgEndFrame, nvgFill, nvgFillColor, nvgRect};
 
 pub struct View {
-    x: u32,
-    y: u32,
-    width: u32,
-    height: u32,
+    x: f32,
+    y: f32,
+    width: f32,
+    height: f32,
 }
 
 impl View {
-    pub fn new(x: u32, y: u32, width: u32, height: u32) -> Self {
-        View {
-            x,
-            y,
-            width,
-            height,
-        }
+    pub fn new(x: f32, y: f32, width: f32, height: f32) -> Self {
+        View { x, y, width, height }
     }
 
-    pub fn draw(
-        &self,
-        context: &PossiblyCurrentContext,
-        surface: &Surface<WindowSurface>,
-        window: &Window,
-        canvas: &mut Canvas<OpenGl>,
-    ) {
-        canvas.clear_rect(
-            self.x,
-            self.y,
-            self.width,
-            self.height,
-            Color::rgbf(1., 0., 0.),
-        );
+    pub fn draw(&self, vg: &Context) {
+        // 默认的绘制方法，子类可以重写此方法
+        unsafe {
+            nvgBeginFrame(vg.raw(), 800.0, 600.0, 1.0);
+            nvgBeginPath(vg.raw());
+            nvgRect(vg.raw(), self.x, self.y, self.width, self.height);
+            nvgFillColor(vg.raw(), NVGcolor{ rgba: [0.0, 1.0, 1.0, 1.0] });
+            nvgFill(vg.raw());
+            nvgEndFrame(vg.raw());
+        }
     }
 }
