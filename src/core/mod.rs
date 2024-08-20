@@ -31,6 +31,8 @@ use glutin::surface::{
 use crate::core::view::View;
 
 pub fn main() {
+    error!("test");
+    info!("test");
     let event_loop = EventLoop::new();
 
     let raw_display = event_loop.raw_display_handle();
