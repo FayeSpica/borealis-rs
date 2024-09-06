@@ -2,14 +2,18 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 
-mod view;
+pub mod application;
+pub mod font;
+pub mod frame_context;
+pub mod platform;
+pub mod view;
 
-use std::ffi::{CStr, CString};
-use std::num::NonZeroU32;
 use nanovg::{Color, Context, PathOptions};
 use raw_window_handle::{
     HasRawDisplayHandle, HasRawWindowHandle, RawDisplayHandle, RawWindowHandle,
 };
+use std::ffi::{CStr, CString};
+use std::num::NonZeroU32;
 
 use winit::event::{Event, WindowEvent};
 use winit::event_loop::EventLoop;
@@ -19,6 +23,7 @@ use winit::platform::unix;
 use winit::platform::unix::WindowBuilderExtUnix;
 use winit::window::{Window, WindowBuilder};
 
+use crate::core::view::View;
 use glutin::config::{Config, ConfigSurfaceTypes, ConfigTemplate, ConfigTemplateBuilder};
 use glutin::context::{ContextApi, ContextAttributesBuilder};
 use glutin::display::{Display, DisplayApiPreference};
@@ -28,7 +33,6 @@ use glutin::prelude::*;
 use glutin::surface::{
     Surface, SurfaceAttributes, SurfaceAttributesBuilder, SwapInterval, WindowSurface,
 };
-use crate::core::view::View;
 
 pub fn main() {
     error!("test");
@@ -41,7 +45,10 @@ pub fn main() {
         // We create a window before the display to accommodate for WGL, since it
         // requires creating HDC for properly loading the WGL and it should be taken
         // from the window you'll be rendering into.
-        WindowBuilder::new().with_transparent(true).build(&event_loop).unwrap()
+        WindowBuilder::new()
+            .with_transparent(true)
+            .build(&event_loop)
+            .unwrap()
     });
     let raw_window_handle = window.as_ref().map(|w| w.raw_window_handle());
 
@@ -72,9 +79,14 @@ pub fn main() {
             // of that.
 
             #[cfg(x11_platform)]
-            let transparency_check =
-                config.x11_visual().map(|v| v.supports_transparency()).unwrap_or(false)
-                    & !accum.x11_visual().map(|v| v.supports_transparency()).unwrap_or(false);
+            let transparency_check = config
+                .x11_visual()
+                .map(|v| v.supports_transparency())
+                .unwrap_or(false)
+                & !accum
+                    .x11_visual()
+                    .map(|v| v.supports_transparency())
+                    .unwrap_or(false);
 
             #[cfg(not(x11_platform))]
             let transparency_check = false;
@@ -100,11 +112,13 @@ pub fn main() {
         .with_context_api(ContextApi::Gles(None))
         .build(raw_window_handle);
     let mut not_current_gl_context = Some(unsafe {
-        gl_display.create_context(&config, &context_attributes).unwrap_or_else(|_| {
-            gl_display
-                .create_context(&config, &fallback_context_attributes)
-                .expect("failed to create context")
-        })
+        gl_display
+            .create_context(&config, &context_attributes)
+            .unwrap_or_else(|_| {
+                gl_display
+                    .create_context(&config, &fallback_context_attributes)
+                    .expect("failed to create context")
+            })
     });
 
     let mut state = None;
@@ -112,6 +126,7 @@ pub fn main() {
 
     event_loop.run(move |event, event_loop_window_target, control_flow| {
         control_flow.set_wait();
+        info!("{:?}", event);
         match event {
             Event::Resumed => {
                 // While this event is only relevant for Android, it is raised on all platforms
@@ -168,7 +183,7 @@ pub fn main() {
                 }
 
                 assert!(state.replace((gl_context, gl_window)).is_none());
-            },
+            }
             Event::Suspended => {
                 // This event is only raised on Android, where the backing NativeWindow for a GL
                 // Surface can appear and disappear at any moment.
@@ -180,7 +195,7 @@ pub fn main() {
                 assert!(not_current_gl_context
                     .replace(gl_context.make_not_current().unwrap())
                     .is_none());
-            },
+            }
 
             Event::WindowEvent { event, .. } => match event {
                 WindowEvent::Resized(size) => {
@@ -199,10 +214,10 @@ pub fn main() {
                             renderer.resize(size.width as i32, size.height as i32);
                         }
                     }
-                },
+                }
                 WindowEvent::CloseRequested => {
                     control_flow.set_exit();
-                },
+                }
                 _ => (),
             },
             Event::RedrawEventsCleared => {
@@ -213,7 +228,7 @@ pub fn main() {
 
                     gl_window.surface.swap_buffers(gl_context).unwrap();
                 }
-            },
+            }
             _ => (),
         }
     });
@@ -234,7 +249,10 @@ pub struct GlWindow {
 
 impl GlWindow {
     pub fn new<T>(event_loop: &EventLoop<T>, display: &Display, config: &Config) -> Self {
-        let window = WindowBuilder::new().with_transparent(true).build(event_loop).unwrap();
+        let window = WindowBuilder::new()
+            .with_transparent(true)
+            .build(event_loop)
+            .unwrap();
         let attrs = surface_attributes(&window);
         let surface = unsafe { display.create_window_surface(config, &attrs).unwrap() };
         Self { window, surface }
@@ -386,7 +404,12 @@ impl Renderer {
             gl.EnableVertexAttribArray(pos_attrib as gl::types::GLuint);
             gl.EnableVertexAttribArray(color_attrib as gl::types::GLuint);
 
-            Self { program, vao, vbo, gl, context,
+            Self {
+                program,
+                vao,
+                vbo,
+                gl,
+                context,
                 views: vec![
                     View::new(0.0, 0.0, 50.0, 50.0),
                     View::new(0.0, 80.0, 10.0, 10.0),
@@ -411,7 +434,8 @@ impl Renderer {
                 |path| {
                     path.rect((100.0, 100.0), (400.0, 300.0));
                     path.fill(Color::from_rgb(255, 192, 0), Default::default());
-                }, PathOptions::default(),
+                },
+                PathOptions::default(),
             );
         });
 
@@ -454,7 +478,12 @@ unsafe fn create_shader(
     source: &[u8],
 ) -> gl::types::GLuint {
     let shader = gl.CreateShader(shader);
-    gl.ShaderSource(shader, 1, [source.as_ptr().cast()].as_ptr(), std::ptr::null());
+    gl.ShaderSource(
+        shader,
+        1,
+        [source.as_ptr().cast()].as_ptr(),
+        std::ptr::null(),
+    );
     gl.CompileShader(shader);
     shader
 }

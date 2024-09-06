@@ -1,5 +1,7 @@
 use nanovg::Context;
-use nanovg_sys::{nvgBeginFrame, nvgBeginPath, NVGcolor, nvgEndFrame, nvgFill, nvgFillColor, nvgRect};
+use nanovg_sys::{
+    nvgBeginFrame, nvgBeginPath, nvgEndFrame, nvgFill, nvgFillColor, nvgRect, NVGcolor,
+};
 
 pub struct View {
     x: f32,
@@ -10,7 +12,12 @@ pub struct View {
 
 impl View {
     pub fn new(x: f32, y: f32, width: f32, height: f32) -> Self {
-        View { x, y, width, height }
+        View {
+            x,
+            y,
+            width,
+            height,
+        }
     }
 
     pub fn draw(&self, vg: &Context) {
@@ -19,7 +26,12 @@ impl View {
             nvgBeginFrame(vg.raw(), 800.0, 600.0, 1.0);
             nvgBeginPath(vg.raw());
             nvgRect(vg.raw(), self.x, self.y, self.width, self.height);
-            nvgFillColor(vg.raw(), NVGcolor{ rgba: [0.0, 1.0, 1.0, 1.0] });
+            nvgFillColor(
+                vg.raw(),
+                NVGcolor {
+                    rgba: [0.0, 1.0, 1.0, 1.0],
+                },
+            );
             nvgFill(vg.raw());
             nvgEndFrame(vg.raw());
         }

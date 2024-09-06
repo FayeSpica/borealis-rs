@@ -1,6 +1,9 @@
 # borealis-rs
 rust reimplement of https://github.com/natinusala/borealis
 
+```shell
+cargo run --example wiliwili
+```
 
 ## mingw64
 
